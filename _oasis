@@ -1,0 +1,16 @@
+OASISFormat:  0.3
+Name:         xapi-backtrace
+Version:      1.0
+Synopsis:     Helper functions for processing backtraces
+License:      LGPL-2.1 with OCaml linking exception
+Authors:      Dave Scott
+Copyrights:   (C) 2014 Citrix
+BuildTools:   ocamlbuild
+Plugins:      DevFiles (0.3), META (0.3)
+
+Library "xapi-backtrace"
+  Path: lib
+  Modules: Backtrace
+  BuildDepends: threads, sexplib, sexplib.syntax
+
+
