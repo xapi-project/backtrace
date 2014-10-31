@@ -179,3 +179,18 @@ let get exn = with_table (fun tbl -> get tbl exn) warning
 let reraise old newexn =
   add newexn (remove old);
   raise newexn
+
+module Interop = struct
+
+  type frame = {
+    filename: string;
+    line: int;
+  }
+
+  type backtrace = frame list
+
+  let to_backtrace frames =
+      List.fold_left (fun (acc, first_line) { filename; line } ->
+        Printf.sprintf "%s file %s, line %d" (if first_line then "Raised at" else "Called from") filename line :: acc, false
+       ) ([], true) frames |> fst
+end
