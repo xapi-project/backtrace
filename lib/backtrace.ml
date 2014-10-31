@@ -134,9 +134,18 @@ let with_lock f x =
     raise e
 
 let with_backtraces f =
-  let id = Thread.self () in
-  let tbl = make () in
-  with_lock (Hashtbl.replace per_thread_backtraces id) tbl;
+  let id = Thread.(id (self ())) in
+  let tbl = with_lock
+    (fun () ->
+      let tbl =
+        if Hashtbl.mem per_thread_backtraces id
+        then Hashtbl.find per_thread_backtraces id
+        else make () in
+      (* If we nest these functions we add multiple bindings
+         to the same mutable table which is ok *)
+      Hashtbl.add per_thread_backtraces id tbl;
+      tbl
+    ) () in
   try
     let result = f () in
     with_lock (Hashtbl.remove per_thread_backtraces) id;
@@ -147,23 +156,25 @@ let with_backtraces f =
     `Error(e, bt)
 
 let with_table f default =
-  let id = Thread.self () in
+  let id = Thread.(id (self ())) in
   match with_lock (fun () ->
     if Hashtbl.mem per_thread_backtraces id
     then Some (Hashtbl.find per_thread_backtraces id)
     else None
   ) () with
-  | None -> default
+  | None -> default ()
   | Some tbl -> f tbl
 
-let is_important exn = with_table (fun tbl -> is_important tbl exn) ()
+let is_important exn = with_table (fun tbl -> is_important tbl exn) (fun () -> ())
 
-let add exn bt = with_table (fun tbl -> add tbl exn bt) ()
+let add exn bt = with_table (fun tbl -> add tbl exn bt) (fun () -> ())
 
-let remove exn = with_table (fun tbl -> remove tbl exn) []
-
-let get exn = with_table (fun tbl -> get tbl exn)
+let warning () =
   [ Printf.sprintf "Thread %d has no backtrace table. Was with_backtraces called?" Thread.(id (self ())) ]
+
+let remove exn = with_table (fun tbl -> remove tbl exn) warning
+
+let get exn = with_table (fun tbl -> get tbl exn) warning
 
 let reraise old newexn =
   add newexn (remove old);
