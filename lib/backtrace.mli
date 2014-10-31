@@ -67,3 +67,22 @@ val set_my_name: string -> unit
     will be the executable name, but it could also include the process ID
     and host. *)
 
+(** {2 Interop with other languages}
+    This allows backtraces from other languages (e.g. python) to be converted
+    into OCaml-style backtraces. *)
+
+module Interop: sig
+
+  type frame = {
+    filename: string; (** Path to the source code file *)
+    line: int;        (** Line number within the source code file *)
+  }
+  (** A single backtrace entry *)
+
+  type backtrace = frame list
+  (** A complete backtrace from (for example) python *)
+
+  val to_backtrace: backtrace -> t
+  (** Construct an OCaml backtrace [t] *)
+end
+
