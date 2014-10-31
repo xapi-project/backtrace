@@ -28,6 +28,12 @@ val to_string_hum: t -> string
     stash away a copy of the backtrace buffer if there is any risk
     of us raising another (or even the same) exception) *)
 
+val with_backtraces: (unit -> 'a) -> [ `Ok of 'a | `Error of (exn * t) ]
+(** Allow backtraces to be recorded for this thread. All new threads
+    must be wrapped in this for the backtrace tracking to work.
+    It is acceptable to nest these wrappers; it will not affect the
+    backtrace recording behaviour. *)
+
 val is_important: exn -> unit
 (** Declare that the backtrace is important for debugging and should be
     permanently associated with the exception. Call this function in
