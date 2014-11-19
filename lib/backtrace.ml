@@ -31,22 +31,27 @@ let rec split_c c str =
     let i = String.index str c in
     String.sub str 0 i :: (split_c c (String.sub str (i+1) (String.length str - i - 1)))
   with Not_found -> [str]
+
+type frame = {
+  process: string;
+  filename: string;
+  line: int;
+} with sexp
     
-type t = string list (* < OCaml 4.02.0 *)
-  with sexp
+type t = frame list with sexp
 
 let empty = []
 
 let to_string_hum xs =
   let xs' = List.length xs in
   let results = Buffer.create 10 in
-  let rec loop i = function
+  let rec loop first_line i = function
   | [] -> Buffer.contents results
   | x :: xs ->
-    Buffer.add_string results (Printf.sprintf "%d/%d %s" i xs' x);
+    Buffer.add_string results (Printf.sprintf "%d/%d %s %s file %s, line %d" i xs' x.process (if first_line then "Raised at" else "Called from") x.filename x.line);
     Buffer.add_string results "\n";
-    loop (i + 1) xs in
-  loop 0 xs
+    loop false (i + 1) xs in
+  loop true 0 xs
 
 type table = {
   backtraces: t array;
@@ -56,14 +61,35 @@ type table = {
 }
 
 (* Increasing this makes 'find_all' slower and increases the amount of
-   memory needed. We maybe should make this a thread-local table. *)
+   memory needed. Since we have a table per thread a small number should
+   be enough. *)
 let max_backtraces = 100
 
+let frame_of_string process x =
+  try
+    begin match split_c '"' x with
+    | [ _; filename; rest ] ->
+      begin match split_c ',' rest with
+      | [ _; line_n; _ ] ->
+        begin match split_c ' ' line_n with
+        | _ :: _ :: n :: _ ->
+          { process; filename; line = int_of_string n }
+        | _ ->
+          failwith (Printf.sprintf "Failed to parse line: [%s]" line_n)
+        end
+      | _ ->
+        failwith (Printf.sprintf "Failed to parse fragment: [%s]" filename)
+      end
+    | _ ->
+        failwith (Printf.sprintf "Failed to parse fragment: [%s]" x)
+    end
+  with e -> { process; filename = "(" ^ (Printexc.to_string e) ^ ")"; line = 0 }
+  
 let get_backtrace_401 () =
   Printexc.get_backtrace ()
   |> split_c '\n'
   |> List.filter (fun x -> x <> "")
-  |> List.map (fun x -> !my_name ^ " " ^ x)
+  |> List.map (frame_of_string !my_name)
 
 let make () =
   let backtraces = Array.make max_backtraces [] in
@@ -170,7 +196,9 @@ let is_important exn = with_table (fun tbl -> is_important tbl exn) (fun () -> (
 let add exn bt = with_table (fun tbl -> add tbl exn bt) (fun () -> ())
 
 let warning () =
-  [ Printf.sprintf "Thread %d has no backtrace table. Was with_backtraces called?" Thread.(id (self ())) ]
+  [ { process = !my_name;
+      filename = Printf.sprintf "(Thread %d has no backtrace table. Was with_backtraces called?" Thread.(id (self ()));
+      line = 0 } ]
 
 let remove exn = with_table (fun tbl -> remove tbl exn) warning
 
@@ -182,15 +210,18 @@ let reraise old newexn =
 
 module Interop = struct
 
-  type frame = {
-    filename: string;
-    line: int;
-  }
+  (* This matches xapi.py:exception *)
+  type error = {
+    error: string;
+    (* Python json.dumps and rpclib are not very friendly *)
+    files: string list;
+    lines: int list;
+  } with rpc
 
-  type backtrace = frame list
-
-  let to_backtrace frames =
-      List.fold_left (fun (acc, first_line) { filename; line } ->
-        Printf.sprintf "%s file %s, line %d" (if first_line then "Raised at" else "Called from") filename line :: acc, false
-       ) ([], true) frames |> fst
+  let of_json source_name txt =
+      txt
+      |> Jsonrpc.of_string
+      |> error_of_rpc
+      |> fun e -> List.combine e.files e.lines
+      |> List.map (fun (filename, line) -> { process = source_name; filename; line })
 end

@@ -11,6 +11,6 @@ Plugins:      DevFiles (0.3), META (0.3)
 Library "xapi-backtrace"
   Path: lib
   Modules: Backtrace
-  BuildDepends: threads, sexplib, sexplib.syntax
+  BuildDepends: threads, sexplib, sexplib.syntax, rpclib, rpclib.syntax
 
 

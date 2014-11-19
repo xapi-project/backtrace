@@ -73,16 +73,8 @@ val set_my_name: string -> unit
 
 module Interop: sig
 
-  type frame = {
-    filename: string; (** Path to the source code file *)
-    line: int;        (** Line number within the source code file *)
-  }
-  (** A single backtrace entry *)
-
-  type backtrace = frame list
-  (** A complete backtrace from (for example) python *)
-
-  val to_backtrace: backtrace -> t
-  (** Construct an OCaml backtrace [t] *)
+  val of_json: string -> string -> t
+  (** [of_json source_name json]: unmarshals a json-format backtrace from
+      [source_name] *)
 end
 
