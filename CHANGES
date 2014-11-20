@@ -1,0 +1,4 @@
+trunk (unreleased)
+
+- store backtraces as lists of records rather than strings
+- change the API for "importing" backtraces from other languages

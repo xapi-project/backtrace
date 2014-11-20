@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 99b24962319f61962f5d90737e4ff4d9)
+# DO NOT EDIT (digest: f9eb71a5c12c76bebad5dfc57456d180)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -16,6 +16,8 @@ true: annot, bin_annot
 "_darcs": not_hygienic
 # Library xapi-backtrace
 "lib/xapi-backtrace.cmxs": use_xapi-backtrace
+<lib/*.ml{,i,y}>: pkg_rpclib
+<lib/*.ml{,i,y}>: pkg_rpclib.syntax
 <lib/*.ml{,i,y}>: pkg_sexplib
 <lib/*.ml{,i,y}>: pkg_sexplib.syntax
 <lib/*.ml{,i,y}>: pkg_threads
