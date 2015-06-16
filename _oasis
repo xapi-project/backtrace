@@ -13,4 +13,9 @@ Library "xapi-backtrace"
   Modules: Backtrace
   BuildDepends: threads, sexplib, sexplib.syntax, rpclib, rpclib.syntax
 
-
+Document backtrace
+  Type:                 ocamlbuild (0.4)
+  BuildTools:           ocamldoc
+  Title:                API reference for Pci
+  XOCamlBuildPath:      .
+  XOCamlBuildLibraries: xapi-backtrace
