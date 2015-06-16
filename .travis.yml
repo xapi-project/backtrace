@@ -1,10 +1,13 @@
 language: c
 sudo: required
 install:
-  - wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
-script: bash -ex .travis-opam.sh
+- wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
+- wget https://raw.githubusercontent.com/simonjbeaumont/ocaml-travisci-skeleton/docgen/.travis-docgen.sh
+script: bash -ex .travis-opam.sh && bash -ex .travis-docgen.sh
 env:
   matrix:
   - OCAML_VERSION=latest
+  global:
+    secure: OQNEBMwT6orlce92OTwoAT9l9lON0JepS7uwrq4FY8JPb8jMaoTVrOL7kOQre41asliQ4hZ4BBY1paWghf2ngJPVAVax+9CRnYCXZViki0AsJ/MfCzchjW/BUEiPf3T1B9CacGT5ctIUkDmQ1lp+U13dUHk+PEdmx7PSuwTiToQ=
 branches:
   only: master
