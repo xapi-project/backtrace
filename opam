@@ -11,4 +11,5 @@ remove: [
 depends: [
   "ocamlfind"
   "sexplib"
+  "rpc"
 ] 
