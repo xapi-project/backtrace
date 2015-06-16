@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Backtrace" rel="Chapter" href="Backtrace.html"><link title="Handling exceptions without losing backtraces" rel="Section" href="#2_Handlingexceptionswithoutlosingbacktraces">
+<link title="Administrivia" rel="Section" href="#2_Administrivia">
+<link title="Interop with other languages" rel="Section" href="#2_Interopwithotherlanguages">
+<link title="Handling exceptions without losing backtraces" rel="Section" href="#2_Handlingexceptionswithoutlosingbacktraces">
+<link title="Administrivia" rel="Section" href="#2_Administrivia">
+<link title="Interop with other languages" rel="Section" href="#2_Interopwithotherlanguages">
+<title>Backtrace</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Backtrace.html">Backtrace</a></h1>
+
+<pre><span class="keyword">module</span> Backtrace: <code class="code">sig</code> <a href="Backtrace.html">..</a> <code class="code">end</code></pre><div class="info module top">
+A backtrace from a particular thread.<br>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> </pre>
+<div class="info ">
+A backtrace from a particular thread.<br>
+</div>
+
+
+<pre><span id="VALempty"><span class="keyword">val</span> empty</span> : <code class="type"><a href="Backtrace.html#TYPEt">t</a></code></pre><div class="info ">
+An empty backtrace<br>
+</div>
+
+<pre><span id="VALto_string_hum"><span class="keyword">val</span> to_string_hum</span> : <code class="type"><a href="Backtrace.html#TYPEt">t</a> -> string</code></pre><div class="info ">
+Produce a human-readable printable/loggable version of the
+    backtrace.<br>
+</div>
+<br>
+<h2 id="2_Handlingexceptionswithoutlosingbacktraces">Handling exceptions without losing backtraces</h2>
+    Whenever a function raises an exception, the backtrace buffer is
+    emptied. Therefore when we are handling an exception, we must
+    stash away a copy of the backtrace buffer if there is any risk
+    of us raising another (or even the same) exception)<br>
+
+<pre><span id="VALwith_backtraces"><span class="keyword">val</span> with_backtraces</span> : <code class="type">(unit -> 'a) -> [ `Error of exn * <a href="Backtrace.html#TYPEt">t</a> | `Ok of 'a ]</code></pre><div class="info ">
+Allow backtraces to be recorded for this thread. All new threads
+    must be wrapped in this for the backtrace tracking to work.
+    It is acceptable to nest these wrappers; it will not affect the
+    backtrace recording behaviour.<br>
+</div>
+
+<pre><span id="VALis_important"><span class="keyword">val</span> is_important</span> : <code class="type">exn -> unit</code></pre><div class="info ">
+Declare that the backtrace is important for debugging and should be
+    permanently associated with the exception. Call this function in
+    an exception handler where you might need to re-raise the same
+    exception at the end after performing some cleanup, which could
+    clear the current backtrace buffer.<br>
+</div>
+
+<pre><span id="VALget"><span class="keyword">val</span> get</span> : <code class="type">exn -> <a href="Backtrace.html#TYPEt">t</a></code></pre><div class="info ">
+Get a copy of the backtrace associated with <code class="code">exn</code><br>
+</div>
+
+<pre><span id="VALadd"><span class="keyword">val</span> add</span> : <code class="type">exn -> <a href="Backtrace.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+Associate additional backtrace with an exception. This allows
+    you to combine a backtrace from another process with your current
+    backtrace.<br>
+</div>
+
+<pre><span id="VALreraise"><span class="keyword">val</span> reraise</span> : <code class="type">exn -> exn -> 'a</code></pre><div class="info ">
+<code class="code">reraise old new</code> associates the backtrace of <code class="code">old</code> with <code class="code">new</code>
+    and throws <code class="code">new</code>. Use this if you need to 'launder' an exception
+    e.g. you may want to catch Not_found and throw a more descriptive
+    exception instead without losing the backtrace.<br>
+</div>
+
+<pre><span id="VALremove"><span class="keyword">val</span> remove</span> : <code class="type">exn -> <a href="Backtrace.html#TYPEt">t</a></code></pre><div class="info ">
+Get a backtrace associated with <code class="code">exn</code> and remove it from the tables.
+    Use this when you want to print/log or otherwise record the final
+    backtrace.<br>
+</div>
+<br>
+<h2 id="2_Administrivia">Administrivia</h2><br>
+
+<pre><span id="VALset_my_name"><span class="keyword">val</span> set_my_name</span> : <code class="type">string -> unit</code></pre><div class="info ">
+Every backtrace line will include a name for this process. By default it
+    will be the executable name, but it could also include the process ID
+    and host.<br>
+</div>
+<br>
+<h2 id="2_Interopwithotherlanguages">Interop with other languages</h2>
+    This allows backtraces from other languages (e.g. python) to be converted
+    into OCaml-style backtraces.<br>
+
+<pre><span class="keyword">module</span> <a href="Backtrace.Interop.html">Interop</a>: <code class="code">sig</code> <a href="Backtrace.Interop.html">..</a> <code class="code">end</code></pre>
+<pre><span id="VALt_of_sexp"><span class="keyword">val</span> t_of_sexp</span> : <code class="type">Sexplib.Sexp.t -> <a href="Backtrace.html#TYPEt">t</a></code></pre>
+<pre><span id="VALsexp_of_t"><span class="keyword">val</span> sexp_of_t</span> : <code class="type"><a href="Backtrace.html#TYPEt">t</a> -> Sexplib.Sexp.t</code></pre><div class="info ">
+A backtrace from a particular thread.<br>
+</div>
+<br>
+An empty backtrace<br>
+<br>
+Produce a human-readable printable/loggable version of the
+    backtrace.<br>
+<br>
+<h2 id="2_Handlingexceptionswithoutlosingbacktraces">Handling exceptions without losing backtraces</h2>
+    Whenever a function raises an exception, the backtrace buffer is
+    emptied. Therefore when we are handling an exception, we must
+    stash away a copy of the backtrace buffer if there is any risk
+    of us raising another (or even the same) exception)<br>
+<br>
+Allow backtraces to be recorded for this thread. All new threads
+    must be wrapped in this for the backtrace tracking to work.
+    It is acceptable to nest these wrappers; it will not affect the
+    backtrace recording behaviour.<br>
+<br>
+Declare that the backtrace is important for debugging and should be
+    permanently associated with the exception. Call this function in
+    an exception handler where you might need to re-raise the same
+    exception at the end after performing some cleanup, which could
+    clear the current backtrace buffer.<br>
+<br>
+Get a copy of the backtrace associated with <code class="code">exn</code><br>
+<br>
+Associate additional backtrace with an exception. This allows
+    you to combine a backtrace from another process with your current
+    backtrace.<br>
+<br>
+<code class="code">reraise old new</code> associates the backtrace of <code class="code">old</code> with <code class="code">new</code>
+    and throws <code class="code">new</code>. Use this if you need to 'launder' an exception
+    e.g. you may want to catch Not_found and throw a more descriptive
+    exception instead without losing the backtrace.<br>
+<br>
+Get a backtrace associated with <code class="code">exn</code> and remove it from the tables.
+    Use this when you want to print/log or otherwise record the final
+    backtrace.<br>
+<br>
+<h2 id="2_Administrivia">Administrivia</h2><br>
+<br>
+Every backtrace line will include a name for this process. By default it
+    will be the executable name, but it could also include the process ID
+    and host.<br>
+<br>
+<h2 id="2_Interopwithotherlanguages">Interop with other languages</h2>
+    This allows backtraces from other languages (e.g. python) to be converted
+    into OCaml-style backtraces.<br>
+<br>
+<code class="code">of_json source_name json</code>: unmarshals a json-format backtrace from
+      <code class="code">source_name</code><br>
+</body></html>
