@@ -1,6 +1,6 @@
 OASISFormat:  0.3
 Name:         xapi-backtrace
-Version:      1.0
+Version:      0.3
 Synopsis:     Helper functions for processing backtraces
 License:      LGPL-2.1 with OCaml linking exception
 Authors:      Dave Scott
