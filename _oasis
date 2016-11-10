@@ -11,7 +11,7 @@ Plugins:      DevFiles (0.3), META (0.3)
 Library "xapi-backtrace"
   Path: lib
   Modules: Backtrace
-  BuildDepends: threads, sexplib, sexplib.syntax, rpclib, rpclib.syntax
+  BuildDepends: threads, sexplib, ppx_sexp_conv, rpclib, ppx_deriving_rpc
 
 Document backtrace
   Type:                 ocamlbuild (0.4)
