@@ -1,8 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: e0e2adcd87cbfc650e00fb9595e79124)
+# DO NOT EDIT (digest: 490bf2d2804a63bdd597621c29a85b5b)
 version = "0.3"
 description = "Helper functions for processing backtraces"
-requires = "threads sexplib sexplib.syntax rpclib rpclib.syntax"
+requires =
+"threads sexplib ppx_sexp_conv rpclib rpclib.json ppx_deriving_rpc"
 archive(byte) = "xapi-backtrace.cma"
 archive(byte, plugin) = "xapi-backtrace.cma"
 archive(native) = "xapi-backtrace.cmxa"

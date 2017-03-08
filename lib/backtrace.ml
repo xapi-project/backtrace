@@ -36,9 +36,9 @@ type frame = {
   process: string;
   filename: string;
   line: int;
-} with sexp
+} [@@deriving sexp]
     
-type t = frame list with sexp
+type t = frame list [@@deriving sexp]
 
 let empty = []
 
@@ -216,7 +216,7 @@ module Interop = struct
     (* Python json.dumps and rpclib are not very friendly *)
     files: string list;
     lines: int list;
-  } with rpc
+  } [@@deriving rpc]
 
   let of_json source_name txt =
       txt

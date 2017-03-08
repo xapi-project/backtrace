@@ -12,7 +12,7 @@
  * GNU Lesser General Public License for more details.
  *)
 
-type t with sexp
+type t [@@deriving sexp]
 (** A backtrace from a particular thread. *)
 
 val empty: t
