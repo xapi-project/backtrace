@@ -2,18 +2,19 @@ language: c
 sudo: required
 install:
   - wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
-  - wget https://raw.githubusercontent.com/simonjbeaumont/ocaml-travisci-skeleton/docgen/.travis-docgen.sh
+  - wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docgen.sh
 script:
   - bash -ex .travis-opam.sh
-  - ( ( test $TRAVIS_PULL_REQUEST = "false" && test $TRAVIS_BRANCH = "master" && bash -ex .travis-docgen.sh ) || true )
+after_success:
+  - test "$GEN_DOC" = 1 && test $TRAVIS_PULL_REQUEST = "false" && test $TRAVIS_BRANCH = "master" && bash -ex .travis-docgen.sh
 env:
   global:
     - secure: OQNEBMwT6orlce92OTwoAT9l9lON0JepS7uwrq4FY8JPb8jMaoTVrOL7kOQre41asliQ4hZ4BBY1paWghf2ngJPVAVax+9CRnYCXZViki0AsJ/MfCzchjW/BUEiPf3T1B9CacGT5ctIUkDmQ1lp+U13dUHk+PEdmx7PSuwTiToQ=
     - TESTS=false
   matrix:
-    - OCAML_VERSION=4.02 BASE_REMOTE=git://github.com/xapi-project/xs-opam
+    - OCAML_VERSION=4.02 BASE_REMOTE=git://github.com/xapi-project/xs-opam GEN_DOC=1
     - OCAML_VERSION=latest EXTRA_REMOTES=git://github.com/xapi-project/xs-opam
 matrix:
   fast_finish: true
   allow_failures:
-    - env: OCAML_VERSION=4.02 EXTRA_REMOTES=git://github.com/xapi-project/xs-opam
+    - env: OCAML_VERSION=latest EXTRA_REMOTES=git://github.com/xapi-project/xs-opam
