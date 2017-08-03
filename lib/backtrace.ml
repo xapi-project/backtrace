@@ -18,6 +18,7 @@ let set_my_name x = my_name := x
 
 module Mutex = struct
   include Mutex
+
   (** execute the function f with the mutex hold *)
   let execute lock f =
     Mutex.lock lock;
@@ -37,7 +38,7 @@ type frame = {
   filename: string;
   line: int;
 } [@@deriving sexp]
-    
+
 type t = frame list [@@deriving sexp]
 
 let empty = []
@@ -84,7 +85,7 @@ let frame_of_string process x =
         failwith (Printf.sprintf "Failed to parse fragment: [%s]" x)
     end
   with e -> { process; filename = "(" ^ (Printexc.to_string e) ^ ")"; line = 0 }
-  
+
 let get_backtrace_401 () =
   Printexc.get_backtrace ()
   |> split_c '\n'
