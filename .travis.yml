@@ -1,20 +1,21 @@
 language: c
-sudo: required
-install:
-  - wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
-  - wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docgen.sh
-script:
-  - bash -ex .travis-opam.sh
-after_success:
-  - test "$GEN_DOC" = 1 && test $TRAVIS_PULL_REQUEST = "false" && test $TRAVIS_BRANCH = "master" && bash -ex .travis-docgen.sh
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash -ex ./.travis-docker.sh
 env:
   global:
-    - secure: OQNEBMwT6orlce92OTwoAT9l9lON0JepS7uwrq4FY8JPb8jMaoTVrOL7kOQre41asliQ4hZ4BBY1paWghf2ngJPVAVax+9CRnYCXZViki0AsJ/MfCzchjW/BUEiPf3T1B9CacGT5ctIUkDmQ1lp+U13dUHk+PEdmx7PSuwTiToQ=
-    - TESTS=false
+  - secure: "BcNzNHmOVQQegY8uI2sOhV5RNpW144M7omUbTIATdxMou690ydk9LJDaWowqyv9JruS6n2ZMu3UO2bf/KySxHG56iZ8mtPtUtp98llWydM37dodGLAK09SX8vD9NqOZ5JK9382Ip83s98DjLrZKdftB4FSt82aOB4erF4hB0ChM="
+  - env: TESTS=false PINS="xapi-backtrace:." PACKAGE=xapi-backtrace DISTRO="debian-unstable"
   matrix:
-    - OCAML_VERSION=4.02 BASE_REMOTE=git://github.com/xapi-project/xs-opam GEN_DOC=1
-    - OCAML_VERSION=latest EXTRA_REMOTES=git://github.com/xapi-project/xs-opam
+  - OCAML_VERSION=4.02.3
+  - OCAML_VERSION=4.03.0
+  - OCAML_VERSION=4.04.2
+  - OCAML_VERSION=4.05.0
+branches:
+  only: master
 matrix:
   fast_finish: true
   allow_failures:
-    - env: OCAML_VERSION=latest EXTRA_REMOTES=git://github.com/xapi-project/xs-opam
+    - env: OCAML_VERSION=4.05.0
