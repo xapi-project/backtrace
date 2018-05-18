@@ -12,6 +12,6 @@ depends: [
   "jbuilder" {build}
   "base-threads"
   "sexplib"
-  "ppx_sexp_conv"
+  "ppx_sexp_conv" {>= "v0.11.0"}
   "rpc" {>= "1.9.51"}
 ]
