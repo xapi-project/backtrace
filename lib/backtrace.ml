@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *)
-open Sexplib.Std
+open Sexplib0.Sexp_conv
 
 let my_name = ref (Filename.basename Sys.argv.(0))
 let set_my_name x = my_name := x
