@@ -5,5 +5,5 @@
   (public_name xapi-backtrace)
   (flags (:standard -w -39-32))
   (libraries
-   (ppx_sexp_conv.runtime-lib rpclib rpclib.json threads sexplib))
+   (rpclib rpclib.json threads))
   (preprocess (pps (ppx_deriving_rpc ppx_sexp_conv)))))
