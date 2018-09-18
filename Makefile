@@ -1,26 +1,26 @@
 .PHONY: build release install uninstall clean test doc reindent
 
 build:
-	jbuilder build @install --dev
+	dune build @install
 
 release:
-	jbuilder build @install
+	dune build @install --profile=release
 
 install:
-	jbuilder install
+	dune install --profile=release
 
 uninstall:
-	jbuilder uninstall
+	dune uninstall
 
 clean:
-	jbuilder clean
+	dune clean
 
 test:
-	jbuilder runtest
+	dune runtest --profile=release
 
 # requires odoc
 doc:
-	jbuilder build @doc
+	dune build @doc --profile=release
 
 reindent:
 	ocp-indent --syntax cstruct -i **/*.ml*
