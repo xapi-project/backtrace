@@ -13,10 +13,14 @@
  *)
 
 (** A backtrace from a particular thread. *)
-type t [@@deriving sexp]
+type t
 
 val empty : t
 (** An empty backtrace *)
+
+val t_of_sexp : Sexplib0.Sexp.t -> t
+
+val sexp_of_t : t -> Sexplib0.Sexp.t
 
 val to_string_hum : t -> string
 (** Produce a human-readable printable/loggable version of the

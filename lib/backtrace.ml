@@ -11,7 +11,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *)
-open Sexplib0.Sexp_conv
 
 let my_name = ref (Filename.basename Sys.argv.(0))
 
@@ -34,11 +33,112 @@ let rec split_c c str =
     :: split_c c (String.sub str (i + 1) (String.length str - i - 1))
   with Not_found -> [str]
 
-type frame = {process: string; filename: string; line: int} [@@deriving sexp]
+type frame = {process: string; filename: string; line: int}
 
-type t = frame list [@@deriving sexp]
+type t = frame list
 
 let empty = []
+
+let frame_of_sexp sexp =
+  let open Sexplib0 in
+  let open Sexplib0.Sexp_conv in
+  match sexp with
+  | Sexp.List field_sexps -> (
+      let process_field = ref None
+      and filename_field = ref None
+      and line_field = ref None
+      and duplicates = ref []
+      and extra = ref [] in
+      let rec iter = function
+        | Sexp.List (Sexp.Atom field_name :: (([] | [_]) as _field_sexps))
+          :: tail ->
+            let _field_sexp () =
+              match _field_sexps with
+              | [x] ->
+                  x
+              | [] ->
+                  Sexp_conv_error.record_only_pairs_expected !my_name sexp
+              | _ ->
+                  assert false
+            in
+            ( match field_name with
+            | "process" -> (
+              match !process_field with
+              | None ->
+                  let _field_sexp = _field_sexp () in
+                  let fvalue = string_of_sexp _field_sexp in
+                  process_field := Some fvalue
+              | Some _ ->
+                  duplicates := field_name :: !duplicates
+            )
+            | "filename" -> (
+              match !filename_field with
+              | None ->
+                  let _field_sexp = _field_sexp () in
+                  let fvalue = string_of_sexp _field_sexp in
+                  filename_field := Some fvalue
+              | Some _ ->
+                  duplicates := field_name :: !duplicates
+            )
+            | "line" -> (
+              match !line_field with
+              | None ->
+                  let _field_sexp = _field_sexp () in
+                  let fvalue = int_of_sexp _field_sexp in
+                  line_field := Some fvalue
+              | Some _ ->
+                  duplicates := field_name :: !duplicates
+            )
+            | _ ->
+                if !Sexp_conv.record_check_extra_fields then
+                  extra := field_name :: !extra
+                else
+                  ()
+            ) ;
+            iter tail
+        | ((Sexp.Atom _ | Sexp.List _) as sexp) :: _ ->
+            Sexp_conv_error.record_only_pairs_expected !my_name sexp
+        | [] ->
+            ()
+      in
+      iter field_sexps ;
+      match (!duplicates, !extra) with
+      | _ :: _, _ ->
+          Sexp_conv_error.record_duplicate_fields !my_name !duplicates sexp
+      | [], _ :: _ ->
+          Sexp_conv_error.record_extra_fields !my_name !extra sexp
+      | [], [] -> (
+        match (!process_field, !filename_field, !line_field) with
+        | Some process_value, Some filename_value, Some line_value ->
+            {process= process_value; filename= filename_value; line= line_value}
+        | _ ->
+            Sexp_conv_error.record_undefined_elements !my_name sexp
+              [
+                (!process_field = None, "process")
+              ; (!filename_field = None, "filename")
+              ; (!line_field = None, "line")
+              ]
+      )
+    )
+  | Sexp.Atom _ as sexp ->
+      Sexp_conv_error.record_list_instead_atom !my_name sexp
+
+let sexp_of_frame {process= v_process; filename= v_filename; line= v_line} =
+  let open Sexplib0 in
+  let open Sexplib0.Sexp_conv in
+  let process_value = sexp_of_string v_process in
+  let filename_value = sexp_of_string v_filename in
+  let line_value = sexp_of_int v_line in
+  Sexp.List
+    [
+      Sexp.List [Sexp.Atom "process"; process_value]
+    ; Sexp.List [Sexp.Atom "filename"; filename_value]
+    ; Sexp.List [Sexp.Atom "line"; line_value]
+    ]
+
+let t_of_sexp = Sexplib0.Sexp_conv.list_of_sexp frame_of_sexp
+
+let sexp_of_t = Sexplib0.Sexp_conv.sexp_of_list sexp_of_frame
 
 let to_string_hum xs =
   let xs' = List.length xs in
