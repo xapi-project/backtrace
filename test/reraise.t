@@ -9,7 +9,7 @@
   1/4 raiser.exe Raised at file test/raiser.ml, line 1
   2/4 raiser.exe Called from file test/raiser.ml, line 4
   3/4 raiser.exe Called from file lib/backtrace.ml, line 251
-  4/4 raiser.exe Called from file test/log.ml, line 55
+  4/4 raiser.exe Called from file test/log.ml, line 44
   
 
   $ ./raiser.exe -v1-with-backtrace
@@ -23,5 +23,5 @@
   1/4 raiser.exe Raised at file test/raiser.ml, line 1
   2/4 raiser.exe Called from file test/raiser.ml, line 6
   3/4 raiser.exe Called from file test/raiser.ml, line 6
-  4/4 raiser.exe Called from file test/log.ml, line 55
+  4/4 raiser.exe Called from file test/log.ml, line 44
   

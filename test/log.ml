@@ -39,17 +39,25 @@ let with_thread_associated_old desc f x =
       log_backtrace_exn exn bt ;
       raise exn
 
-let with_thread_associated desc f x =
-  let print_backtrace = function 
-    | Ok result ->
-        result
-    | Error (exn, bt) ->
-        output_log
-          (Printf.sprintf "%s failed with exception %s" desc
-             (Printexc.to_string exn)
-          ) ;
-        log_backtrace_exn exn bt ;
-        raise exn
-  in
-  let@ () = Backtrace.V2.with_backtraces ~finally:print_backtrace in
+let rec with_thread_associated desc f x =
+  let@ () = Backtrace.V2.with_backtraces ~finally:(print_backtrace desc) in
   try f x with e -> Backtrace.is_important e ; raise e
+
+and print_backtrace desc = function 
+  | Ok result ->
+      result
+  | Error ((Failure msg) as exn, bt) ->
+      (* stabilize output for Failure exceptions across compiler versions *)
+      output_log
+        (Printf.sprintf {|%s failed with exception Failure("%s")|} desc
+           msg
+        ) ;
+      log_backtrace_exn exn bt ;
+      raise exn
+  | Error (exn, bt) ->
+      output_log
+        (Printf.sprintf {|%s failed with exception %s|} desc
+           (Printexc.to_string exn)
+        ) ;
+      log_backtrace_exn exn bt ;
+      raise exn
